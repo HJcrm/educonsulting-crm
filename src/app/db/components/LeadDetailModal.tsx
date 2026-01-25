@@ -49,7 +49,8 @@ export function LeadDetailModal({ lead, onClose }: Props) {
   const [loading, setLoading] = useState(true);
   const [stage, setStage] = useState<LeadStage>(lead.stage);
   const [saving, setSaving] = useState(false);
-  const [hasChanges, setHasChanges] = useState(false);
+  const [hasStageChanges, setHasStageChanges] = useState(false);
+  const [hasAnyChanges, setHasAnyChanges] = useState(false);
 
   // 메모 폼
   const [newMemo, setNewMemo] = useState("");
@@ -108,7 +109,7 @@ export function LeadDetailModal({ lead, onClose }: Props) {
 
   // 단계 변경 감지
   useEffect(() => {
-    setHasChanges(stage !== (detail?.stage || lead.stage));
+    setHasStageChanges(stage !== (detail?.stage || lead.stage));
   }, [stage, detail?.stage, lead.stage]);
 
   // 단계 저장
@@ -122,7 +123,8 @@ export function LeadDetailModal({ lead, onClose }: Props) {
       });
       if (res.ok) {
         setDetail((prev) => (prev ? { ...prev, stage } : null));
-        setHasChanges(false);
+        setHasStageChanges(false);
+        setHasAnyChanges(true);
       }
     } catch (error) {
       console.error("Failed to update stage:", error);
@@ -142,6 +144,7 @@ export function LeadDetailModal({ lead, onClose }: Props) {
       });
       if (res.ok) {
         setDetail((prev) => (prev ? { ...prev, assignee: newAssignee } : null));
+        setHasAnyChanges(true);
       }
     } catch (error) {
       console.error("Failed to update assignee:", error);
@@ -194,6 +197,7 @@ export function LeadDetailModal({ lead, onClose }: Props) {
             : null
         );
         setNewMemo("");
+        setHasAnyChanges(true);
       }
     } catch (error) {
       console.error("Failed to add memo:", error);
@@ -227,6 +231,7 @@ export function LeadDetailModal({ lead, onClose }: Props) {
         setAppointmentDate("");
         setAppointmentTime("");
         setAppointmentNotes("");
+        setHasAnyChanges(true);
       }
     } catch (error) {
       console.error("Failed to add appointment:", error);
@@ -252,7 +257,7 @@ export function LeadDetailModal({ lead, onClose }: Props) {
       {/* Overlay */}
       <div
         className="absolute inset-0 bg-black/50"
-        onClick={() => onClose(hasChanges)}
+        onClick={() => onClose(hasAnyChanges)}
       />
 
       {/* Modal */}
@@ -263,7 +268,7 @@ export function LeadDetailModal({ lead, onClose }: Props) {
             {lead.parent_name}
           </h2>
           <button
-            onClick={() => onClose(hasChanges)}
+            onClick={() => onClose(hasAnyChanges)}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
           >
             <X className="w-5 h-5 text-gray-500" />
@@ -393,7 +398,7 @@ export function LeadDetailModal({ lead, onClose }: Props) {
                       </option>
                     ))}
                   </select>
-                  {hasChanges && (
+                  {hasStageChanges && (
                     <button
                       onClick={handleSaveStage}
                       disabled={saving}
@@ -637,7 +642,7 @@ export function LeadDetailModal({ lead, onClose }: Props) {
         {/* Footer */}
         <div className="px-6 py-4 border-t bg-gray-50">
           <button
-            onClick={() => onClose(hasChanges)}
+            onClick={() => onClose(hasAnyChanges)}
             className="w-full py-2 text-gray-600 hover:bg-gray-200 rounded-lg transition-colors"
           >
             닫기
