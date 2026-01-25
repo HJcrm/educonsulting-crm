@@ -1,5 +1,4 @@
 import { createClient } from "@supabase/supabase-js";
-import type { Database } from "@/types/database";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
@@ -10,7 +9,7 @@ const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
  * RLS 정책 적용됨
  */
 export function createServerClient() {
-  return createClient<Database>(supabaseUrl, supabaseAnonKey);
+  return createClient(supabaseUrl, supabaseAnonKey);
 }
 
 /**
@@ -22,7 +21,7 @@ export function createServiceClient() {
   if (!supabaseServiceRoleKey) {
     throw new Error("SUPABASE_SERVICE_ROLE_KEY is not configured");
   }
-  return createClient<Database>(supabaseUrl, supabaseServiceRoleKey, {
+  return createClient(supabaseUrl, supabaseServiceRoleKey, {
     auth: {
       autoRefreshToken: false,
       persistSession: false,

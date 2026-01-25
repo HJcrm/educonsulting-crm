@@ -34,9 +34,10 @@ export async function getConversionRate(filter: DateFilter = "all") {
   }
 
   const total = count || 0;
+  const leads = data as { stage: string }[] | null;
   const consulted =
-    data?.filter((lead) =>
-      ["CONSULTED", "PAID"].includes(lead.stage as string)
+    leads?.filter((lead) =>
+      ["CONSULTED", "PAID"].includes(lead.stage)
     ).length || 0;
 
   return {
@@ -77,7 +78,8 @@ export async function getLeadCount(filter: DateFilter = "7d") {
   }
 
   // 데이터 집계
-  data?.forEach((lead) => {
+  const leadsWithDate = data as { created_at: string }[] | null;
+  leadsWithDate?.forEach((lead) => {
     const date = dayjs(lead.created_at).format("MM/DD");
     if (trendMap.has(date)) {
       trendMap.set(date, (trendMap.get(date) || 0) + 1);
@@ -114,7 +116,8 @@ export async function getRegionDistribution(filter: DateFilter = "all") {
 
   // 지역별 집계
   const regionMap = new Map<string, number>();
-  data?.forEach((lead) => {
+  const leadsWithRegion = data as { region: string | null }[] | null;
+  leadsWithRegion?.forEach((lead) => {
     const region = lead.region || "미입력";
     regionMap.set(region, (regionMap.get(region) || 0) + 1);
   });
@@ -148,7 +151,8 @@ export async function getGradeDistribution(filter: DateFilter = "all") {
 
   // 학년별 집계
   const gradeMap = new Map<string, number>();
-  data?.forEach((lead) => {
+  const leadsWithGrade = data as { student_grade: string | null }[] | null;
+  leadsWithGrade?.forEach((lead) => {
     const grade = lead.student_grade || "미입력";
     gradeMap.set(grade, (gradeMap.get(grade) || 0) + 1);
   });
@@ -218,7 +222,8 @@ export async function getStagePipeline(filter: DateFilter = "all") {
   stageOrder.forEach((stage) => stageMap.set(stage, 0));
 
   // 집계
-  data?.forEach((lead) => {
+  const leadsWithStage = data as { stage: string }[] | null;
+  leadsWithStage?.forEach((lead) => {
     const stage = lead.stage as LeadStage;
     stageMap.set(stage, (stageMap.get(stage) || 0) + 1);
   });

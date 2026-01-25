@@ -154,6 +154,7 @@ export interface Database {
       interaction_type: InteractionType;
       appointment_status: AppointmentStatus;
     };
+    Functions: Record<string, never>;
   };
 }
 
