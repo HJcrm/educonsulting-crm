@@ -256,12 +256,68 @@ export async function POST(request: NextRequest) {
 
     // 6. Supabase에 저장
     const supabase = createServiceClient();
+    const normalizedPhone = normalizePhone(parentPhone);
 
+    // 6-1. 기존 리드 검색 (전화번호 기준)
+    const { data: existingLead } = await (supabase as any)
+      .from("leads")
+      .select("id, parent_name")
+      .eq("parent_phone", normalizedPhone)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .single();
+
+    if (existingLead) {
+      // 재문의: 기존 리드 업데이트 + interaction 추가
+      console.log("[Tally Webhook] Returning customer found:", existingLead.id);
+
+      // 기존 리드 업데이트 (stage를 NEW로 리셋, updated_at 갱신)
+      const { error: updateError } = await (supabase as any)
+        .from("leads")
+        .update({
+          stage: "NEW",
+          updated_at: new Date().toISOString(),
+          // 새 문의 정보로 업데이트
+          student_grade: studentGrade || undefined,
+          desired_track: desiredTrack || undefined,
+          desired_timing: desiredTiming || undefined,
+          question_context: questionContext || undefined,
+        })
+        .eq("id", existingLead.id);
+
+      if (updateError) {
+        console.error("[Tally Webhook] Update error:", updateError);
+      }
+
+      // 새 문의 내용을 interaction으로 저장
+      const interactionContent = `[재문의]\n` +
+        `문의 내용: ${questionContext || "(없음)"}\n` +
+        `학년: ${studentGrade || "(없음)"}\n` +
+        `희망계열: ${desiredTrack || "(없음)"}\n` +
+        `상담희망시간: ${desiredTiming || "(없음)"}`;
+
+      await (supabase as any)
+        .from("interactions")
+        .insert({
+          lead_id: existingLead.id,
+          type: "MEMO",
+          content: interactionContent,
+        });
+
+      return NextResponse.json({
+        success: true,
+        leadId: existingLead.id,
+        isReturning: true,
+        message: "Returning customer updated",
+      });
+    }
+
+    // 6-2. 신규 리드 생성
     const leadData: LeadInsert = {
       source: "tally",
       form_submission_id: payload.data.submissionId,
       parent_name: parentName,
-      parent_phone: normalizePhone(parentPhone),
+      parent_phone: normalizedPhone,
       student_grade: studentGrade,
       desired_track: desiredTrack,
       region: region,
@@ -297,10 +353,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log("[Tally Webhook] Lead created:", data?.id);
+    console.log("[Tally Webhook] New lead created:", data?.id);
     return NextResponse.json({
       success: true,
       leadId: data?.id,
+      isReturning: false,
     });
   } catch (error) {
     console.error("[Tally Webhook] Unexpected error:", error);
