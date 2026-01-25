@@ -29,7 +29,7 @@ export async function getLeads({
   let query = supabase
     .from("leads")
     .select("*", { count: "exact" })
-    .order("updated_at", { ascending: false })
+    .order("created_at", { ascending: false })
     .range(offset, offset + pageSize - 1);
 
   // 검색어가 있으면 여러 필드에 대해 OR 검색
