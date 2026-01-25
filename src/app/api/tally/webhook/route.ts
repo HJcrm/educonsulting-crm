@@ -259,58 +259,13 @@ export async function POST(request: NextRequest) {
     const normalizedPhone = normalizePhone(parentPhone);
 
     // 6-1. 기존 리드 검색 (전화번호 기준)
-    const { data: existingLead } = await (supabase as any)
+    const { data: existingLeads } = await (supabase as any)
       .from("leads")
-      .select("id, parent_name")
+      .select("id, parent_name, stage, created_at, question_context")
       .eq("parent_phone", normalizedPhone)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .single();
+      .order("created_at", { ascending: false });
 
-    if (existingLead) {
-      // 재문의: 기존 리드 업데이트 + interaction 추가
-      console.log("[Tally Webhook] Returning customer found:", existingLead.id);
-
-      // 기존 리드 업데이트 (stage를 NEW로 리셋, updated_at 갱신)
-      const { error: updateError } = await (supabase as any)
-        .from("leads")
-        .update({
-          stage: "NEW",
-          updated_at: new Date().toISOString(),
-          // 새 문의 정보로 업데이트
-          student_grade: studentGrade || undefined,
-          desired_track: desiredTrack || undefined,
-          desired_timing: desiredTiming || undefined,
-          question_context: questionContext || undefined,
-        })
-        .eq("id", existingLead.id);
-
-      if (updateError) {
-        console.error("[Tally Webhook] Update error:", updateError);
-      }
-
-      // 새 문의 내용을 interaction으로 저장
-      const interactionContent = `[재문의]\n` +
-        `문의 내용: ${questionContext || "(없음)"}\n` +
-        `학년: ${studentGrade || "(없음)"}\n` +
-        `희망계열: ${desiredTrack || "(없음)"}\n` +
-        `상담희망시간: ${desiredTiming || "(없음)"}`;
-
-      await (supabase as any)
-        .from("interactions")
-        .insert({
-          lead_id: existingLead.id,
-          type: "MEMO",
-          content: interactionContent,
-        });
-
-      return NextResponse.json({
-        success: true,
-        leadId: existingLead.id,
-        isReturning: true,
-        message: "Returning customer updated",
-      });
-    }
+    const isReturning = existingLeads && existingLeads.length > 0;
 
     // 6-2. 신규 리드 생성
     const leadData: LeadInsert = {
@@ -353,11 +308,31 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log("[Tally Webhook] New lead created:", data?.id);
+    // 6-3. 재문의인 경우: 기존 상담 이력을 메모로 추가
+    if (isReturning && data?.id) {
+      console.log("[Tally Webhook] Returning customer - adding history memo");
+
+      const historyLines = existingLeads.map((lead: any, idx: number) => {
+        const date = new Date(lead.created_at).toLocaleDateString("ko-KR");
+        return `${idx + 1}. ${date} - ${lead.stage} - ${lead.question_context || "(문의내용 없음)"}`;
+      });
+
+      const historyMemo = `[재문의 고객] 기존 상담 이력 ${existingLeads.length}건\n\n${historyLines.join("\n")}`;
+
+      await (supabase as any)
+        .from("interactions")
+        .insert({
+          lead_id: data.id,
+          type: "MEMO",
+          content: historyMemo,
+        });
+    }
+
+    console.log("[Tally Webhook] Lead created:", data?.id, isReturning ? "(returning)" : "(new)");
     return NextResponse.json({
       success: true,
       leadId: data?.id,
-      isReturning: false,
+      isReturning,
     });
   } catch (error) {
     console.error("[Tally Webhook] Unexpected error:", error);
