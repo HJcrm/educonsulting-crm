@@ -151,6 +151,7 @@ export function LeadsTable({ initialSearch, initialPage }: Props) {
               <th className="text-left px-4 py-3 font-medium">학년</th>
               <th className="text-left px-4 py-3 font-medium">희망계열</th>
               <th className="text-left px-4 py-3 font-medium">단계</th>
+              <th className="text-left px-4 py-3 font-medium">담당자</th>
               <th className="text-left px-4 py-3 font-medium">상담시기</th>
               <th className="text-left px-4 py-3 font-medium max-w-[200px]">
                 궁금한 상황
@@ -163,7 +164,7 @@ export function LeadsTable({ initialSearch, initialPage }: Props) {
             {loading ? (
               Array.from({ length: 10 }).map((_, i) => (
                 <tr key={i}>
-                  {Array.from({ length: 9 }).map((_, j) => (
+                  {Array.from({ length: 10 }).map((_, j) => (
                     <td key={j} className="px-4 py-3">
                       <div className="h-4 bg-gray-100 rounded animate-pulse" />
                     </td>
@@ -172,7 +173,7 @@ export function LeadsTable({ initialSearch, initialPage }: Props) {
               ))
             ) : result?.data.length === 0 ? (
               <tr>
-                <td colSpan={9} className="px-4 py-12 text-center text-gray-500">
+                <td colSpan={10} className="px-4 py-12 text-center text-gray-500">
                   {debouncedSearch
                     ? "검색 결과가 없습니다."
                     : "등록된 리드가 없습니다."}
@@ -205,6 +206,9 @@ export function LeadsTable({ initialSearch, initialPage }: Props) {
                     >
                       {STAGE_LABELS[lead.stage as LeadStage]}
                     </span>
+                  </td>
+                  <td className="px-4 py-3 text-gray-600">
+                    {(lead as any).assignee || "-"}
                   </td>
                   <td className="px-4 py-3 text-gray-600">
                     {lead.desired_timing || "-"}
