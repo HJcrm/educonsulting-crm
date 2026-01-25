@@ -1,4 +1,4 @@
-import { createServerClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/server";
 import type { Lead, LeadWithRelations, Interaction, Appointment } from "@/types/database";
 
 export interface LeadsQuery {
@@ -23,7 +23,7 @@ export async function getLeads({
   page = 1,
   pageSize = 20,
 }: LeadsQuery = {}): Promise<LeadsResult> {
-  const supabase = createServerClient();
+  const supabase = createServiceClient();
   const offset = (page - 1) * pageSize;
 
   let query = supabase
@@ -68,7 +68,7 @@ export async function getLeads({
  * 단일 리드 조회 (상세 정보 + 관계 데이터)
  */
 export async function getLeadById(id: string): Promise<LeadWithRelations | null> {
-  const supabase = createServerClient();
+  const supabase = createServiceClient();
 
   // 리드 기본 정보
   const { data: lead, error: leadError } = await supabase
@@ -110,7 +110,7 @@ export async function updateLeadStage(
   id: string,
   stage: Lead["stage"]
 ): Promise<Lead | null> {
-  const supabase = createServerClient();
+  const supabase = createServiceClient();
 
   const { data, error } = await supabase
     .from("leads")
@@ -135,7 +135,7 @@ export async function addInteraction(
   content: string,
   type: Interaction["type"] = "MEMO"
 ): Promise<Interaction | null> {
-  const supabase = createServerClient();
+  const supabase = createServiceClient();
 
   const { data, error } = await supabase
     .from("interactions")
@@ -163,7 +163,7 @@ export async function addAppointment(
   scheduledAt: string,
   notes?: string
 ): Promise<Appointment | null> {
-  const supabase = createServerClient();
+  const supabase = createServiceClient();
 
   const { data, error } = await supabase
     .from("appointments")
