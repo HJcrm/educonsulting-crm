@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { getLeadById, updateLeadStage } from "@/lib/queries/leads";
+import { getLeadById, updateLead } from "@/lib/queries/leads";
 
 const UpdateLeadSchema = z.object({
-  stage: z.enum(["NEW", "CONTACTED", "BOOKED", "CONSULTED", "PAID", "LOST"]),
+  stage: z.enum(["NEW", "CONTACTED", "BOOKED", "CONSULTED", "PAID", "LOST"]).optional(),
+  assignee: z.string().nullable().optional(),
 });
 
 export async function GET(
@@ -42,8 +43,8 @@ export async function PATCH(
       );
     }
 
-    const { stage } = parseResult.data;
-    const lead = await updateLeadStage(params.id, stage);
+    const updates = parseResult.data;
+    const lead = await updateLead(params.id, updates);
 
     if (!lead) {
       return NextResponse.json(

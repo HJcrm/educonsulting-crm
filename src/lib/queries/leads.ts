@@ -113,23 +113,23 @@ export async function getLeadById(id: string): Promise<LeadWithRelations | null>
 }
 
 /**
- * 리드 단계 업데이트
+ * 리드 업데이트 (단계, 담당자 등)
  */
-export async function updateLeadStage(
+export async function updateLead(
   id: string,
-  stage: Lead["stage"]
+  updates: { stage?: Lead["stage"]; assignee?: string | null }
 ): Promise<Lead | null> {
   const supabase = createServiceClient();
 
   const { data, error } = await supabase
     .from("leads")
-    .update({ stage })
+    .update(updates)
     .eq("id", id)
     .select()
     .single();
 
   if (error) {
-    console.error("Error updating lead stage:", error);
+    console.error("Error updating lead:", error);
     return null;
   }
 

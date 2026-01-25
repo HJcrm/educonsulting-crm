@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Save, Plus, Calendar, MessageSquare, History } from "lucide-react";
+import { X, Save, Plus, Calendar, MessageSquare, History, User, UserPlus } from "lucide-react";
 import {
   STAGE_LABELS,
   STAGE_COLORS,
@@ -10,6 +10,7 @@ import {
   type Interaction,
   type Appointment,
   type PreviousLead,
+  type Assignee,
 } from "@/types/database";
 
 // 네이티브 날짜 포맷 함수
@@ -61,6 +62,13 @@ export function LeadDetailModal({ lead, onClose }: Props) {
   const [appointmentNotes, setAppointmentNotes] = useState("");
   const [addingAppointment, setAddingAppointment] = useState(false);
 
+  // 담당자
+  const [assignees, setAssignees] = useState<Assignee[]>([]);
+  const [assignee, setAssignee] = useState<string | null>(null);
+  const [showAddAssignee, setShowAddAssignee] = useState(false);
+  const [newAssigneeName, setNewAssigneeName] = useState("");
+  const [addingAssignee, setAddingAssignee] = useState(false);
+
   // 상세 데이터 fetch
   useEffect(() => {
     async function fetchDetail() {
@@ -71,6 +79,7 @@ export function LeadDetailModal({ lead, onClose }: Props) {
           const data = await res.json();
           setDetail(data);
           setStage(data.stage);
+          setAssignee(data.assignee || null);
         }
       } catch (error) {
         console.error("Failed to fetch lead detail:", error);
@@ -80,6 +89,22 @@ export function LeadDetailModal({ lead, onClose }: Props) {
     }
     fetchDetail();
   }, [lead.id]);
+
+  // 담당자 목록 fetch
+  useEffect(() => {
+    async function fetchAssignees() {
+      try {
+        const res = await fetch("/api/assignees");
+        if (res.ok) {
+          const data = await res.json();
+          setAssignees(data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch assignees:", error);
+      }
+    }
+    fetchAssignees();
+  }, []);
 
   // 단계 변경 감지
   useEffect(() => {
@@ -103,6 +128,48 @@ export function LeadDetailModal({ lead, onClose }: Props) {
       console.error("Failed to update stage:", error);
     } finally {
       setSaving(false);
+    }
+  };
+
+  // 담당자 변경
+  const handleAssigneeChange = async (newAssignee: string | null) => {
+    setAssignee(newAssignee);
+    try {
+      const res = await fetch(`/api/leads/${lead.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ assignee: newAssignee }),
+      });
+      if (res.ok) {
+        setDetail((prev) => (prev ? { ...prev, assignee: newAssignee } : null));
+      }
+    } catch (error) {
+      console.error("Failed to update assignee:", error);
+    }
+  };
+
+  // 담당자 추가
+  const handleAddAssignee = async () => {
+    if (!newAssigneeName.trim()) return;
+    setAddingAssignee(true);
+    try {
+      const res = await fetch("/api/assignees", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: newAssigneeName.trim() }),
+      });
+      if (res.ok) {
+        const newAssigneeData = await res.json();
+        setAssignees((prev) => [...prev, newAssigneeData]);
+        setNewAssigneeName("");
+        setShowAddAssignee(false);
+        // 새로 추가한 담당자로 바로 할당
+        handleAssigneeChange(newAssigneeData.name);
+      }
+    } catch (error) {
+      console.error("Failed to add assignee:", error);
+    } finally {
+      setAddingAssignee(false);
     }
   };
 
@@ -257,6 +324,56 @@ export function LeadDetailModal({ lead, onClose }: Props) {
                     {formatDateTime(detail.created_at)}
                   </p>
                 </div>
+              </div>
+
+              {/* 담당자 */}
+              <div className="border-t pt-4">
+                <label className="block text-sm text-gray-500 mb-2 flex items-center gap-2">
+                  <User className="w-4 h-4" />
+                  담당자
+                </label>
+                <div className="flex items-center gap-2">
+                  <select
+                    value={assignee || ""}
+                    onChange={(e) => handleAssigneeChange(e.target.value || null)}
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
+                  >
+                    <option value="">담당자 없음</option>
+                    {assignees.map((a) => (
+                      <option key={a.id} value={a.name}>
+                        {a.name}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    onClick={() => setShowAddAssignee(!showAddAssignee)}
+                    className="p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
+                    title="담당자 추가"
+                  >
+                    <UserPlus className="w-5 h-5" />
+                  </button>
+                </div>
+                {showAddAssignee && (
+                  <div className="mt-2 flex items-center gap-2">
+                    <input
+                      type="text"
+                      placeholder="새 담당자 이름"
+                      value={newAssigneeName}
+                      onChange={(e) => setNewAssigneeName(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") handleAddAssignee();
+                      }}
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    />
+                    <button
+                      onClick={handleAddAssignee}
+                      disabled={addingAssignee || !newAssigneeName.trim()}
+                      className="px-3 py-2 bg-primary-600 text-white rounded-lg text-sm hover:bg-primary-700 disabled:opacity-50"
+                    >
+                      추가
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* 단계 변경 */}

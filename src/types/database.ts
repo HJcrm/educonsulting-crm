@@ -171,6 +171,13 @@ export type Appointment = Database["public"]["Tables"]["appointments"]["Row"];
 export type AppointmentInsert =
   Database["public"]["Tables"]["appointments"]["Insert"];
 
+// 담당자
+export interface Assignee {
+  id: string;
+  name: string;
+  created_at: string;
+}
+
 // 이전 리드 요약 정보
 export interface PreviousLead {
   id: string;
