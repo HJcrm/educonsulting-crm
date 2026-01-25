@@ -29,6 +29,7 @@ export async function getLeads({
   let query = supabase
     .from("leads")
     .select("*", { count: "exact" })
+    .is("hidden_by_lead_id", null)
     .order("created_at", { ascending: false })
     .range(offset, offset + pageSize - 1);
 
@@ -65,7 +66,7 @@ export async function getLeads({
 }
 
 /**
- * 단일 리드 조회 (상세 정보 + 관계 데이터)
+ * 단일 리드 조회 (상세 정보 + 관계 데이터 + 이전 리드)
  */
 export async function getLeadById(id: string): Promise<LeadWithRelations | null> {
   const supabase = createServiceClient();
@@ -96,10 +97,18 @@ export async function getLeadById(id: string): Promise<LeadWithRelations | null>
     .eq("lead_id", id)
     .order("scheduled_at", { ascending: true });
 
+  // 이전 리드 (이 리드에 의해 숨겨진 리드들)
+  const { data: previousLeads } = await supabase
+    .from("leads")
+    .select("id, parent_name, stage, created_at, question_context, student_grade, desired_track")
+    .eq("hidden_by_lead_id", id)
+    .order("created_at", { ascending: false });
+
   return {
     ...lead,
     interactions: interactions || [],
     appointments: appointments || [],
+    previousLeads: previousLeads || [],
   };
 }
 

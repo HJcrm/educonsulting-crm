@@ -171,10 +171,22 @@ export type Appointment = Database["public"]["Tables"]["appointments"]["Row"];
 export type AppointmentInsert =
   Database["public"]["Tables"]["appointments"]["Insert"];
 
+// 이전 리드 요약 정보
+export interface PreviousLead {
+  id: string;
+  parent_name: string;
+  stage: LeadStage;
+  created_at: string;
+  question_context: string | null;
+  student_grade: string | null;
+  desired_track: string | null;
+}
+
 // 리드 + 관계 데이터
 export interface LeadWithRelations extends Lead {
   interactions?: Interaction[];
   appointments?: Appointment[];
+  previousLeads?: PreviousLead[];
 }
 
 // 단계별 라벨

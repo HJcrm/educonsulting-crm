@@ -308,24 +308,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 6-3. 재문의인 경우: 기존 상담 이력을 메모로 추가
+    // 6-3. 재문의인 경우: 기존 리드들 숨김 처리
     if (isReturning && data?.id) {
-      console.log("[Tally Webhook] Returning customer - adding history memo");
+      console.log("[Tally Webhook] Returning customer - hiding previous leads");
 
-      const historyLines = existingLeads.map((lead: any, idx: number) => {
-        const date = new Date(lead.created_at).toLocaleDateString("ko-KR");
-        return `${idx + 1}. ${date} - ${lead.stage} - ${lead.question_context || "(문의내용 없음)"}`;
-      });
-
-      const historyMemo = `[재문의 고객] 기존 상담 이력 ${existingLeads.length}건\n\n${historyLines.join("\n")}`;
-
+      // 기존 리드들의 hidden_by_lead_id에 새 리드 ID 저장
+      const existingLeadIds = existingLeads.map((lead: any) => lead.id);
       await (supabase as any)
-        .from("interactions")
-        .insert({
-          lead_id: data.id,
-          type: "MEMO",
-          content: historyMemo,
-        });
+        .from("leads")
+        .update({ hidden_by_lead_id: data.id })
+        .in("id", existingLeadIds);
     }
 
     console.log("[Tally Webhook] Lead created:", data?.id, isReturning ? "(returning)" : "(new)");

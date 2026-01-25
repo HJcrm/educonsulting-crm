@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Save, Plus, Calendar, MessageSquare } from "lucide-react";
+import { X, Save, Plus, Calendar, MessageSquare, History } from "lucide-react";
 import {
   STAGE_LABELS,
   STAGE_COLORS,
@@ -9,6 +9,7 @@ import {
   type LeadStage,
   type Interaction,
   type Appointment,
+  type PreviousLead,
 } from "@/types/database";
 
 // 네이티브 날짜 포맷 함수
@@ -30,6 +31,7 @@ interface Props {
 interface LeadDetail extends Lead {
   interactions: Interaction[];
   appointments: Appointment[];
+  previousLeads: PreviousLead[];
 }
 
 const STAGES: LeadStage[] = [
@@ -300,6 +302,59 @@ export function LeadDetailModal({ lead, onClose }: Props) {
                   ))}
                 </div>
               </div>
+
+              {/* 재문의 현황 */}
+              {detail.previousLeads && detail.previousLeads.length > 0 && (
+                <div className="border-t pt-4">
+                  <h3 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
+                    <History className="w-4 h-4" />
+                    재문의 현황
+                    <span className="text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full">
+                      {detail.previousLeads.length}건
+                    </span>
+                  </h3>
+                  <div className="space-y-2">
+                    {detail.previousLeads.map((prevLead) => (
+                      <details
+                        key={prevLead.id}
+                        className="group bg-gray-50 rounded-lg overflow-hidden"
+                      >
+                        <summary className="flex items-center justify-between p-3 cursor-pointer hover:bg-gray-100 transition-colors">
+                          <div className="flex items-center gap-3">
+                            <span className="text-sm font-medium text-gray-700">
+                              {new Date(prevLead.created_at).toLocaleDateString("ko-KR")}
+                            </span>
+                            <span
+                              className={`text-xs px-2 py-0.5 rounded ${STAGE_COLORS[prevLead.stage]}`}
+                            >
+                              {STAGE_LABELS[prevLead.stage]}
+                            </span>
+                          </div>
+                          <span className="text-xs text-gray-400 group-open:rotate-180 transition-transform">
+                            ▼
+                          </span>
+                        </summary>
+                        <div className="px-3 pb-3 pt-1 border-t border-gray-200 text-sm space-y-1">
+                          <p>
+                            <span className="text-gray-500">학년:</span>{" "}
+                            <span className="text-gray-700">{prevLead.student_grade || "-"}</span>
+                          </p>
+                          <p>
+                            <span className="text-gray-500">희망계열:</span>{" "}
+                            <span className="text-gray-700">{prevLead.desired_track || "-"}</span>
+                          </p>
+                          <p>
+                            <span className="text-gray-500">문의내용:</span>{" "}
+                            <span className="text-gray-700 whitespace-pre-wrap">
+                              {prevLead.question_context || "-"}
+                            </span>
+                          </p>
+                        </div>
+                      </details>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* 상담 예약 */}
               <div className="border-t pt-4">
