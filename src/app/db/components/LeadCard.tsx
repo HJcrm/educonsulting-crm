@@ -3,7 +3,7 @@
 import { memo } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Phone, MessageSquare, Eye, GripVertical } from "lucide-react";
+import { Phone, MessageSquare, Eye, GripVertical, Star } from "lucide-react";
 import { Lead } from "@/types/database";
 
 interface LeadCardProps {
@@ -11,6 +11,7 @@ interface LeadCardProps {
   onClick?: () => void;
   onCall?: () => void;
   onMessage?: () => void;
+  onToggleHighInterest?: (checked: boolean) => void;
   isDragging?: boolean;
 }
 
@@ -40,29 +41,50 @@ function LeadCardComponent({
   onClick,
   onCall,
   onMessage,
+  onToggleHighInterest,
   isDragging = false,
 }: LeadCardProps) {
   const assignee = (lead as any).assignee as string | null;
+  const isHighInterest = (lead as any).is_high_interest as boolean | undefined;
 
   return (
     <div
       className={`
-        bg-white rounded-lg border border-gray-200 p-3 shadow-sm
-        hover:shadow-md hover:border-gray-300 transition-all cursor-pointer
+        bg-white rounded-lg border p-3 shadow-sm
+        hover:shadow-md transition-all cursor-pointer
         ${isDragging ? "shadow-lg ring-2 ring-primary-500 ring-opacity-50" : ""}
+        ${isHighInterest ? "border-yellow-400 bg-yellow-50/50" : "border-gray-200 hover:border-gray-300"}
       `}
       onClick={onClick}
     >
-      {/* 상단: 이름 + 빠른 액션 */}
+      {/* 상단: 고관여 체크 + 이름 + 빠른 액션 */}
       <div className="flex items-start justify-between mb-2">
-        <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-gray-900 truncate">
-            {lead.parent_name}
-          </h3>
-          <p className="text-xs text-gray-500 truncate">
-            {lead.student_grade || "학년 미입력"}{" "}
-            {lead.desired_track && `· ${lead.desired_track}`}
-          </p>
+        <div className="flex items-start gap-2 flex-1 min-w-0">
+          {/* 고관여 체크박스 */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleHighInterest?.(!isHighInterest);
+            }}
+            className={`mt-0.5 p-1 rounded transition-colors ${
+              isHighInterest
+                ? "text-yellow-500 hover:text-yellow-600"
+                : "text-gray-300 hover:text-yellow-400"
+            }`}
+            title={isHighInterest ? "고관여 해제" : "고관여 표시"}
+            aria-label={isHighInterest ? "고관여 해제" : "고관여 표시"}
+          >
+            <Star className={`w-4 h-4 ${isHighInterest ? "fill-current" : ""}`} />
+          </button>
+          <div className="flex-1 min-w-0">
+            <h3 className="font-semibold text-gray-900 truncate">
+              {lead.parent_name}
+            </h3>
+            <p className="text-xs text-gray-500 truncate">
+              {lead.student_grade || "학년 미입력"}{" "}
+              {lead.desired_track && `· ${lead.desired_track}`}
+            </p>
+          </div>
         </div>
         <div className="flex items-center gap-1 ml-2">
           <button
@@ -138,6 +160,7 @@ export function DraggableLeadCard({
   onClick,
   onCall,
   onMessage,
+  onToggleHighInterest,
 }: LeadCardProps) {
   const {
     attributes,
@@ -182,6 +205,7 @@ export function DraggableLeadCard({
           onClick={onClick}
           onCall={onCall}
           onMessage={onMessage}
+          onToggleHighInterest={onToggleHighInterest}
           isDragging={isDragging}
         />
       </div>

@@ -154,6 +154,38 @@ export function PipelineBoard() {
     window.location.href = `sms:${phone}`;
   }, [formatKoreanPhone]);
 
+  // 고관여 토글
+  const handleToggleHighInterest = useCallback(
+    async (lead: Lead, checked: boolean) => {
+      // Optimistic update
+      updateLeadLocally(lead.id, { is_high_interest: checked } as any);
+
+      try {
+        const res = await fetch(`/api/leads/${lead.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ is_high_interest: checked }),
+        });
+
+        if (res.ok) {
+          addToast(
+            checked
+              ? `${lead.parent_name} 리드를 고관여로 표시했습니다.`
+              : `${lead.parent_name} 리드의 고관여 표시를 해제했습니다.`,
+            "success"
+          );
+        } else {
+          throw new Error("Failed to update");
+        }
+      } catch {
+        // 실패 시 롤백
+        updateLeadLocally(lead.id, { is_high_interest: !checked } as any);
+        addToast("고관여 상태 변경에 실패했습니다.", "error");
+      }
+    },
+    [updateLeadLocally, addToast]
+  );
+
   // 모달 닫기
   const handleModalClose = useCallback(
     (refreshNeeded?: boolean) => {
@@ -209,6 +241,7 @@ export function PipelineBoard() {
                     onLeadClick={setSelectedLead}
                     onCall={handleCall}
                     onMessage={handleMessage}
+                    onToggleHighInterest={handleToggleHighInterest}
                   />
                 ))}
           </div>

@@ -113,11 +113,11 @@ export async function getLeadById(id: string): Promise<LeadWithRelations | null>
 }
 
 /**
- * 리드 업데이트 (단계, 담당자 등)
+ * 리드 업데이트 (단계, 담당자, 고관여 여부 등)
  */
 export async function updateLead(
   id: string,
-  updates: { stage?: Lead["stage"]; assignee?: string | null }
+  updates: { stage?: Lead["stage"]; assignee?: string | null; is_high_interest?: boolean }
 ): Promise<Lead | null> {
   const supabase = createServiceClient();
 

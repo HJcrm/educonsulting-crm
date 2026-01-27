@@ -5,6 +5,7 @@ import { getLeadById, updateLead } from "@/lib/queries/leads";
 const UpdateLeadSchema = z.object({
   stage: z.enum(["NEW", "CONTACTED", "BOOKED", "CONSULTED", "PAID", "LOST"]).optional(),
   assignee: z.string().nullable().optional(),
+  is_high_interest: z.boolean().optional(),
 });
 
 export async function GET(

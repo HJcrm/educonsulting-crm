@@ -32,6 +32,7 @@ export interface Database {
           desired_timing: string | null;
           question_context: string | null;
           stage: LeadStage;
+          is_high_interest: boolean;
           utm_source: string | null;
           utm_medium: string | null;
           utm_campaign: string | null;
@@ -53,6 +54,7 @@ export interface Database {
           desired_timing?: string | null;
           question_context?: string | null;
           stage?: LeadStage;
+          is_high_interest?: boolean;
           utm_source?: string | null;
           utm_medium?: string | null;
           utm_campaign?: string | null;
@@ -74,6 +76,7 @@ export interface Database {
           desired_timing?: string | null;
           question_context?: string | null;
           stage?: LeadStage;
+          is_high_interest?: boolean;
           utm_source?: string | null;
           utm_medium?: string | null;
           utm_campaign?: string | null;

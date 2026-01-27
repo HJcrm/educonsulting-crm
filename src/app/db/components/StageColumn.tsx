@@ -16,6 +16,7 @@ interface StageColumnProps {
   onLeadClick: (lead: Lead) => void;
   onCall: (lead: Lead) => void;
   onMessage: (lead: Lead) => void;
+  onToggleHighInterest: (lead: Lead, checked: boolean) => void;
 }
 
 function StageColumnComponent({
@@ -25,6 +26,7 @@ function StageColumnComponent({
   onLeadClick,
   onCall,
   onMessage,
+  onToggleHighInterest,
 }: StageColumnProps) {
   const { setNodeRef, isOver } = useDroppable({
     id: `column-${stage}`,
@@ -93,6 +95,7 @@ function StageColumnComponent({
                   onClick={() => onLeadClick(lead)}
                   onCall={() => onCall(lead)}
                   onMessage={() => onMessage(lead)}
+                  onToggleHighInterest={(checked) => onToggleHighInterest(lead, checked)}
                 />
               ))
             ) : (
