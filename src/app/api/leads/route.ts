@@ -8,8 +8,8 @@ export async function GET(request: NextRequest) {
   const page = parseInt(searchParams.get("page") || "1", 10);
   const pageSize = parseInt(searchParams.get("pageSize") || "20", 10);
 
-  // 유효성 검사
-  if (page < 1 || pageSize < 1 || pageSize > 100) {
+  // 유효성 검사 (pageSize 최대 1000 - 파이프라인 뷰용)
+  if (page < 1 || pageSize < 1 || pageSize > 1000) {
     return NextResponse.json(
       { error: "Invalid pagination parameters" },
       { status: 400 }
