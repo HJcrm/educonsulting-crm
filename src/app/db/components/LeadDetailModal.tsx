@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Save, Plus, Calendar, MessageSquare, History, User, UserPlus } from "lucide-react";
+import { X, Save, Plus, Calendar, MessageSquare, History, User, UserPlus, FileText } from "lucide-react";
 import {
   STAGE_LABELS,
   STAGE_COLORS,
@@ -43,6 +43,18 @@ const STAGES: LeadStage[] = [
   "PAID",
   "LOST",
 ];
+
+// 상담 기록 템플릿
+const MEMO_TEMPLATE = `▶️고교 유형 :
+▶️희망 대학 :
+▶️희망학과 :
+▶️선택 과목 :
+▶️내신 :
+▶️최근 모의고사 :
+▶️동아리(동아리 등) :
+▶️학생 성향(성격/ 소통 능력) :
+▶️학부모 성향(학부모 성격 및 학종에 대한 이해도) :
+▶️상담 내용 : `;
 
 export function LeadDetailModal({ lead, onClose }: Props) {
   const [detail, setDetail] = useState<LeadDetail | null>(null);
@@ -578,33 +590,39 @@ export function LeadDetailModal({ lead, onClose }: Props) {
 
               {/* 메모/상담기록 */}
               <div className="border-t pt-4">
-                <h3 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
-                  <MessageSquare className="w-4 h-4" />
-                  메모 / 상담기록
-                </h3>
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-medium text-gray-900 flex items-center gap-2">
+                    <MessageSquare className="w-4 h-4" />
+                    메모 / 상담기록
+                  </h3>
+                  <button
+                    onClick={() => setNewMemo(MEMO_TEMPLATE)}
+                    className="flex items-center gap-1 text-sm text-primary-600 hover:text-primary-700"
+                    title="상담 기록 템플릿 불러오기"
+                  >
+                    <FileText className="w-4 h-4" />
+                    템플릿
+                  </button>
+                </div>
 
                 {/* 메모 입력 */}
-                <div className="flex gap-2 mb-4">
-                  <input
-                    type="text"
+                <div className="space-y-2 mb-4">
+                  <textarea
                     placeholder="메모를 입력하세요..."
                     value={newMemo}
                     onChange={(e) => setNewMemo(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && !e.shiftKey) {
-                        e.preventDefault();
-                        handleAddMemo();
-                      }
-                    }}
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    rows={newMemo.includes("\n") ? 10 : 2}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
                   />
-                  <button
-                    onClick={handleAddMemo}
-                    disabled={addingMemo || !newMemo.trim()}
-                    className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-900 disabled:opacity-50 transition-colors text-sm"
-                  >
-                    추가
-                  </button>
+                  <div className="flex justify-end">
+                    <button
+                      onClick={handleAddMemo}
+                      disabled={addingMemo || !newMemo.trim()}
+                      className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-900 disabled:opacity-50 transition-colors text-sm"
+                    >
+                      추가
+                    </button>
+                  </div>
                 </div>
 
                 {/* 메모 목록 */}
