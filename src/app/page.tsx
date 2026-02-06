@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { LayoutDashboard, Database } from "lucide-react";
+import { LayoutDashboard, Database, Users } from "lucide-react";
 
 export default function HomePage() {
   return (
@@ -26,7 +26,15 @@ export default function HomePage() {
             className="flex-1 flex items-center justify-center gap-3 bg-gray-800 hover:bg-gray-900 text-white font-semibold py-4 px-6 rounded-xl transition-colors"
           >
             <Database className="w-5 h-5" />
-            DB
+            B레벨 DB
+          </Link>
+
+          <Link
+            href="/c-leads"
+            className="flex-1 flex items-center justify-center gap-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-4 px-6 rounded-xl transition-colors"
+          >
+            <Users className="w-5 h-5" />
+            C레벨 DB
           </Link>
         </div>
       </div>
