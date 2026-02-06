@@ -55,6 +55,7 @@ const LABEL_KEYWORD_MAPPING: Record<string, string[]> = {
   parent_name: ["성함", "이름", "학부모"],
   parent_phone: ["전화번호", "연락처", "phone"],
   student_grade: ["학년", "grade"],
+  desired_track: ["희망계열", "계열", "track"],
   region: ["지역", "거주지", "region"],
   question_context: ["궁금", "문의", "question", "내용"],
 };
@@ -204,6 +205,7 @@ export async function POST(request: NextRequest) {
     const parentName = getFieldByColumn(fields, "parent_name");
     const parentPhone = getFieldByColumn(fields, "parent_phone");
     const studentGrade = getFieldByColumn(fields, "student_grade");
+    const desiredTrack = getFieldByColumn(fields, "desired_track");
     const region = getFieldByColumn(fields, "region");
     const questionContext = getFieldByColumn(fields, "question_context");
 
@@ -211,6 +213,7 @@ export async function POST(request: NextRequest) {
       parentName,
       parentPhone,
       studentGrade,
+      desiredTrack,
       region,
       questionContext,
     });
@@ -237,6 +240,7 @@ export async function POST(request: NextRequest) {
       parent_name: parentName,
       parent_phone: normalizedPhone,
       student_grade: studentGrade,
+      desired_track: desiredTrack,
       region: region,
       question_context: questionContext,
       status: "ACTIVE",

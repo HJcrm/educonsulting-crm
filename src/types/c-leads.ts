@@ -17,6 +17,7 @@ export interface CLead {
   parent_name: string;
   parent_phone: string;
   student_grade: string | null;
+  desired_track: string | null;
   region: string | null;
   question_context: string | null;
   status: CLeadStatus;
@@ -36,6 +37,7 @@ export interface CLeadInsert {
   parent_name: string;
   parent_phone: string;
   student_grade?: string | null;
+  desired_track?: string | null;
   region?: string | null;
   question_context?: string | null;
   status?: CLeadStatus;

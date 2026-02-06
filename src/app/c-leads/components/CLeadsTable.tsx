@@ -134,11 +134,8 @@ export function CLeadsTable({ initialSearch, initialPage }: Props) {
               <th className="text-left px-4 py-3 font-medium">학부모명</th>
               <th className="text-left px-4 py-3 font-medium">전화번호</th>
               <th className="text-left px-4 py-3 font-medium">학년</th>
-              <th className="text-left px-4 py-3 font-medium">지역</th>
+              <th className="text-left px-4 py-3 font-medium">희망계열</th>
               <th className="text-left px-4 py-3 font-medium">상태</th>
-              <th className="text-left px-4 py-3 font-medium max-w-[200px]">
-                문의내용
-              </th>
               <th className="text-left px-4 py-3 font-medium">생성일</th>
               <th className="text-center px-4 py-3 font-medium w-16">
                 <MessageSquare className="w-4 h-4 mx-auto text-gray-400" />
@@ -149,7 +146,7 @@ export function CLeadsTable({ initialSearch, initialPage }: Props) {
             {loading ? (
               Array.from({ length: 10 }).map((_, i) => (
                 <tr key={i}>
-                  {Array.from({ length: 8 }).map((_, j) => (
+                  {Array.from({ length: 7 }).map((_, j) => (
                     <td key={j} className="px-4 py-3">
                       <div className="h-4 bg-gray-100 rounded animate-pulse" />
                     </td>
@@ -158,7 +155,7 @@ export function CLeadsTable({ initialSearch, initialPage }: Props) {
               ))
             ) : result?.data.length === 0 ? (
               <tr>
-                <td colSpan={8} className="px-4 py-12 text-center text-gray-500">
+                <td colSpan={7} className="px-4 py-12 text-center text-gray-500">
                   {debouncedSearch
                     ? "검색 결과가 없습니다."
                     : "등록된 리드가 없습니다."}
@@ -181,7 +178,7 @@ export function CLeadsTable({ initialSearch, initialPage }: Props) {
                     {lead.student_grade || "-"}
                   </td>
                   <td className="px-4 py-3 text-gray-600">
-                    {lead.region || "-"}
+                    {lead.desired_track || "-"}
                   </td>
                   <td className="px-4 py-3">
                     <span
@@ -191,9 +188,6 @@ export function CLeadsTable({ initialSearch, initialPage }: Props) {
                     >
                       {STATUS_LABELS[lead.status as CLeadStatus]}
                     </span>
-                  </td>
-                  <td className="px-4 py-3 text-gray-600 max-w-[200px] truncate">
-                    {lead.question_context || "-"}
                   </td>
                   <td className="px-4 py-3 text-gray-500 text-xs">
                     {formatDate(lead.created_at)}

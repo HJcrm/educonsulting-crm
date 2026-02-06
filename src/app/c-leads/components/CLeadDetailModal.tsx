@@ -171,21 +171,15 @@ export function CLeadDetailModal({ lead, onClose }: Props) {
                   </p>
                 </div>
                 <div>
-                  <span className="text-gray-500">지역</span>
+                  <span className="text-gray-500">희망계열</span>
                   <p className="font-medium text-gray-900">
-                    {detail.region || "-"}
+                    {detail.desired_track || "-"}
                   </p>
                 </div>
                 <div>
                   <span className="text-gray-500">등록일</span>
                   <p className="font-medium text-gray-900">
                     {formatDateTime(detail.created_at)}
-                  </p>
-                </div>
-                <div className="col-span-2">
-                  <span className="text-gray-500">문의내용</span>
-                  <p className="font-medium text-gray-900 whitespace-pre-wrap">
-                    {detail.question_context || "-"}
                   </p>
                 </div>
                 {detail.lastMessageAt && (
